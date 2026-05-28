@@ -3,22 +3,6 @@ from math import pow
 import random
 import re
 
-try:
-    import numpy as np
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
-    from sklearn.neighbors import NearestNeighbors
-except Exception:  # pragma: no cover - used only before dependencies are installed.
-    np = None
-    TfidfVectorizer = None
-    cosine_similarity = None
-    NearestNeighbors = None
-
-try:
-    import spacy
-except Exception:  # pragma: no cover
-    spacy = None
-
 from accounts.models import StudentProfile
 from learning.models import (
     Course,
@@ -28,6 +12,51 @@ from learning.models import (
     LearningPathItem,
     StudentSkill,
 )
+
+
+_TEXT_TOOLS = None
+_KNN_TOOLS = None
+_SPACY_MODEL = None
+_SPACY_MODEL_LOADED = False
+
+
+def _load_text_tools():
+    global _TEXT_TOOLS
+    if _TEXT_TOOLS is None:
+        try:
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.metrics.pairwise import cosine_similarity
+
+            _TEXT_TOOLS = (TfidfVectorizer, cosine_similarity)
+        except Exception:
+            _TEXT_TOOLS = (None, None)
+    return _TEXT_TOOLS
+
+
+def _load_knn_tools():
+    global _KNN_TOOLS
+    if _KNN_TOOLS is None:
+        try:
+            import numpy as np
+            from sklearn.neighbors import NearestNeighbors
+
+            _KNN_TOOLS = (np, NearestNeighbors)
+        except Exception:
+            _KNN_TOOLS = (None, None)
+    return _KNN_TOOLS
+
+
+def _load_spacy_model():
+    global _SPACY_MODEL, _SPACY_MODEL_LOADED
+    if not _SPACY_MODEL_LOADED:
+        _SPACY_MODEL_LOADED = True
+        try:
+            import spacy
+
+            _SPACY_MODEL = spacy.load("en_core_web_sm")
+        except Exception:
+            _SPACY_MODEL = None
+    return _SPACY_MODEL
 
 
 class RecommendationEngine:
@@ -44,12 +73,7 @@ class RecommendationEngine:
     }
 
     def __init__(self):
-        self._nlp = None
-        if spacy:
-            try:
-                self._nlp = spacy.load("en_core_web_sm")
-            except Exception:
-                self._nlp = None
+        self._nlp = _load_spacy_model()
 
     def generate_learning_path(self, user, max_courses=5):
         courses = list(
@@ -118,6 +142,7 @@ class RecommendationEngine:
     def content_based_scores(self, user, courses):
         learner_text = self._learner_text(user)
         course_texts = [self._course_text(course) for course in courses]
+        TfidfVectorizer, cosine_similarity = _load_text_tools()
         if TfidfVectorizer and cosine_similarity:
             corpus = [learner_text] + course_texts
             matrix = TfidfVectorizer(stop_words="english").fit_transform(corpus)
@@ -170,6 +195,7 @@ class RecommendationEngine:
         return self._normalize({course.id: scores[course.id] for course in courses})
 
     def knn_scores(self, user, courses):
+        np, NearestNeighbors = _load_knn_tools()
         if np is None or NearestNeighbors is None:
             return self.collaborative_scores(user, courses)
 
