@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PLPRS{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <h1>Welcome, {{ user.first_name|default:"Student" }}!</h1>
+  <p>Your personalized learning journey starts here.</p>
+</div>
+
+<section class="stat-grid">
+  <article class="stat-card blue">
+    <i class="bi bi-journal-richtext"></i>
+    <div>
+      <span>Skills Identified</span>
+      <strong>{{ skills_count }}</strong>
+    </div>
+  </article>
+  <article class="stat-card green">
+    <i class="bi bi-graph-up"></i>
+    <div>
+      <span>Completed Courses</span>
+      <strong>{{ completed_courses }}</strong>
+    </div>
+  </article>
+  <article class="stat-card amber">
+    <i class="bi bi-bullseye"></i>
+    <div>
+      <span>Active Goals</span>
+      <strong>{{ active_courses }}</strong>
+    </div>
+  </article>
+  <article class="stat-card rose">
+    <i class="bi bi-pie-chart"></i>
+    <div>
+      <span>Overall Progress</span>
+      <strong>{{ overall_progress }}%</strong>
+    </div>
+  </article>
+</section>
+
+<section class="dashboard-grid">
+  <article class="surface">
+    <div class="section-title">
+      <h2>Recommended Learning Path</h2>
+      <a href="{% url 'learning_path' %}">View full path</a>
+    </div>
+    <div class="path-list compact">
+      {% for item in path.items.all %}
+        <div class="path-row">
+          <span class="step-dot status-{{ item.status }}">{{ item.order }}</span>
+          <div>
+            <strong>{{ item.course.title }}</strong>
+            <small>{{ item.course.get_difficulty_display }}</small>
+          </div>
+          <span class="status-pill status-{{ item.status }}">{{ item.get_status_display }}</span>
+        </div>
+      {% empty %}
+        <p class="empty-state">Run the demo seed command and complete an assessment.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <div class="stack">
+    <article class="surface">
+      <h2>Progress Overview</h2>
+      <div class="progress-chart" style="--progress: {{ overall_progress }}%">
+        <div class="chart-line"></div>
+        <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Week 5</span>
+      </div>
+    </article>
+    <article class="surface">
+      <h2>Recent Activity</h2>
+      <div class="activity-list">
+        {% for row in recent_activity %}
+          <div>
+            <i class="bi bi-check-circle-fill"></i>
+            <span>{{ row.get_status_display }}: {{ row.course.title }}</span>
+            <small>{{ row.last_activity_at|timesince }} ago</small>
+          </div>
+        {% empty %}
+          <p class="empty-state">No activity yet.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - PLPRS{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <h1>User Profile</h1>
+  <p>Keep your target role, interests, and learning goals current.</p>
+</div>
+
+<section class="surface form-surface">
+  <form method="post" class="form-grid">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="{% if field.name == 'interests' %}grid-span-2{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <div class="grid-span-2">
+      <button class="btn btn-primary" type="submit">Save Profile</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

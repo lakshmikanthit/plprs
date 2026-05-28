@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Path - PLPRS{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <h1>Your Personalized Learning Path</h1>
+  <p>Step-by-step path tailored for your goals.</p>
+</div>
+
+<section class="learning-layout">
+  <article class="surface">
+    <div class="path-list">
+      {% for item in path.items.all %}
+        <div class="path-row expanded">
+          <span class="step-dot status-{{ item.status }}">{{ item.order }}</span>
+          <div>
+            <strong>{{ item.course.title }}</strong>
+            <p>{{ item.course.description }}</p>
+            <small>{{ item.reason }}</small>
+          </div>
+          <div class="path-actions">
+            <span class="status-pill status-{{ item.status }}">{{ item.get_status_display }}</span>
+            {% if item.status == "pending" %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <input type="hidden" name="action" value="start">
+                <button class="btn btn-outline-primary btn-sm" type="submit">Start</button>
+              </form>
+            {% elif item.status == "in_progress" %}
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <input type="hidden" name="action" value="complete">
+                <button class="btn btn-primary btn-sm" type="submit">Complete</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="empty-state">No learning path generated yet.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <aside class="surface progress-aside">
+    <h2>Path Progress</h2>
+    <div class="donut" style="--value: {{ path.overall_progress }}%">
+      <span>{{ path.overall_progress }}%</span>
+      <small>Completed</small>
+    </div>
+    <p>{{ path.items.count }} learning steps</p>
+    <a class="btn btn-primary w-100" href="{% url 'resource_recommender' %}">Continue Learning</a>
+  </aside>
+</section>
+{% endblock %}

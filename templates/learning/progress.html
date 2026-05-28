@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Progress - PLPRS{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <h1>Progress Tracking</h1>
+  <p>Monitor your course completion and path progress.</p>
+</div>
+
+<section class="stat-grid">
+  <article class="stat-card green">
+    <i class="bi bi-check2-circle"></i>
+    <div>
+      <span>Path Progress</span>
+      <strong>{{ path.overall_progress }}%</strong>
+    </div>
+  </article>
+  {% for row in status_counts %}
+    <article class="stat-card blue">
+      <i class="bi bi-bar-chart"></i>
+      <div>
+        <span>{{ row.status|title }}</span>
+        <strong>{{ row.total }}</strong>
+      </div>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="surface">
+  <h2>Course Progress</h2>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>Last Activity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in progress %}
+          <tr>
+            <td>{{ row.course.title }}</td>
+            <td><span class="status-pill status-{{ row.status }}">{{ row.get_status_display }}</span></td>
+            <td>
+              <div class="meter">
+                <span style="width: {{ row.progress_percent }}%"></span>
+              </div>
+              <strong>{{ row.progress_percent }}%</strong>
+            </td>
+            <td>{{ row.last_activity_at|timesince }} ago</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4">Start a course from your learning path to track progress.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

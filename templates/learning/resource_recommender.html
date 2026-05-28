@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - PLPRS{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <h1>Recommended Resources</h1>
+  <p>Top resources for your next learning step.</p>
+</div>
+
+<div class="info-banner">
+  {% if next_item %}
+    <strong>Next Topic: {{ next_item.course.title }}</strong><br>
+    Here are the best resources to help you learn this topic.
+  {% else %}
+    Complete your current path or retake the assessment to refresh resources.
+  {% endif %}
+</div>
+
+<section class="resource-grid">
+  {% for resource in resources %}
+    <article class="resource-card">
+      <div class="resource-logo">{{ resource.platform }}</div>
+      <h2>{{ resource.title }}</h2>
+      <p>{{ resource.description }}</p>
+      <div class="resource-meta">
+        <span>{{ resource.get_resource_type_display }}</span>
+        <strong>{{ resource.rating }} <i class="bi bi-star-fill"></i></strong>
+      </div>
+      <a class="btn btn-primary w-100" href="{{ resource.url }}" target="_blank" rel="noopener">View Resource</a>
+    </article>
+  {% empty %}
+    <article class="surface">
+      <p class="empty-state">No resources found for the next topic.</p>
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

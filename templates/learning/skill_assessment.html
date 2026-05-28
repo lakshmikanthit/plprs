@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Assessment - PLPRS{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <h1>Skill Assessment</h1>
+  <p>Evaluate your current skills.</p>
+</div>
+
+<div class="info-banner">
+  This assessment helps PLPRS understand your current knowledge level and recommend the best learning path for you.
+</div>
+
+<section class="assessment-layout">
+  <article class="surface">
+    <h2>Assessment Questions</h2>
+    {% if questions_available %}
+      <form method="post" class="assessment-form">
+        {% csrf_token %}
+        {% for field in form %}
+          <fieldset>
+            <legend>{{ field.label }}</legend>
+            {{ field }}
+            {{ field.errors }}
+          </fieldset>
+        {% endfor %}
+        <button class="btn btn-primary" type="submit">Submit Assessment</button>
+      </form>
+    {% else %}
+      <p class="empty-state">No questions found. Run `python manage.py seed_demo_data`.</p>
+    {% endif %}
+  </article>
+
+  <article class="surface">
+    <h2>Assessment Results</h2>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Your Level</th>
+            <th>Proficiency</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student_skill in student_skills %}
+            <tr>
+              <td>{{ student_skill.skill.name }}</td>
+              <td>{{ student_skill.get_source_display }}</td>
+              <td>
+                <div class="meter">
+                  <span style="width: {{ student_skill.proficiency }}%"></span>
+                </div>
+                <strong>{{ student_skill.proficiency }}%</strong>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3">Submit the assessment to see your skill profile.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+{% endblock %}
