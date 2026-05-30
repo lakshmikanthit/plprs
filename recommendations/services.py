@@ -1,4 +1,5 @@
 from collections import defaultdict
+import logging
 from math import pow
 import os
 import random
@@ -20,6 +21,7 @@ _KNN_TOOLS = None
 _SPACY_MODEL = None
 _SPACY_MODEL_LOADED = False
 ENABLE_ML_LIBS = os.getenv("PLPRS_ENABLE_ML_LIBS", "False").lower() == "true"
+logger = logging.getLogger(__name__)
 
 
 def _load_text_tools():
@@ -102,8 +104,13 @@ class RecommendationEngine:
         if not candidates:
             candidates = courses
 
-        score_map = self.score_courses(user, candidates)
-        ordered_courses = self.ant_colony_path(candidates, score_map, max_courses=max_courses)
+        try:
+            score_map = self.score_courses(user, candidates)
+            ordered_courses = self.ant_colony_path(candidates, score_map, max_courses=max_courses)
+        except Exception:
+            logger.exception("Falling back to simple course ordering for user %s.", user.id)
+            ordered_courses = candidates[:max_courses]
+            score_map = {course.id: 0.5 for course in ordered_courses}
 
         profile, _ = StudentProfile.objects.get_or_create(user=user)
         path = LearningPath.objects.create(
