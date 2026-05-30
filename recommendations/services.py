@@ -1,6 +1,5 @@
 from collections import defaultdict
 from math import pow
-import os
 import random
 import re
 
@@ -19,12 +18,9 @@ _TEXT_TOOLS = None
 _KNN_TOOLS = None
 _SPACY_MODEL = None
 _SPACY_MODEL_LOADED = False
-ENABLE_ML_LIBS = os.getenv("PLPRS_ENABLE_ML_LIBS", "False").lower() == "true"
 
 
 def _load_text_tools():
-    if not ENABLE_ML_LIBS:
-        return None, None
     global _TEXT_TOOLS
     if _TEXT_TOOLS is None:
         try:
@@ -38,8 +34,6 @@ def _load_text_tools():
 
 
 def _load_knn_tools():
-    if not ENABLE_ML_LIBS:
-        return None, None
     global _KNN_TOOLS
     if _KNN_TOOLS is None:
         try:
@@ -53,8 +47,6 @@ def _load_knn_tools():
 
 
 def _load_spacy_model():
-    if not ENABLE_ML_LIBS:
-        return None
     global _SPACY_MODEL, _SPACY_MODEL_LOADED
     if not _SPACY_MODEL_LOADED:
         _SPACY_MODEL_LOADED = True
